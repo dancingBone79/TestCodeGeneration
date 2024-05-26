@@ -15,9 +15,9 @@ namespace TestCodeGeneration
 			compositionOrder.Add("ManageCashDeskCRUDService::createCashDesk");
 			compositionOrder.Add("CoCoMESystem::openCashDesk");
 
-			string code = Generate(compositionOrder, "python");
+			string code = Generate(compositionOrder, "bash");
 			Console.WriteLine(code);
-			using (StreamWriter sw = new StreamWriter("program.py"))
+			using (StreamWriter sw = new StreamWriter("program.sh"))
 				sw.WriteLine(code);
 
 		}
@@ -79,23 +79,24 @@ namespace TestCodeGeneration
 				case "String":
 					return "\"a\"";
 				case "Integer":
-					return "1";
+					return "\"1\"";
 				case "Boolean":
-					return "False";
+					return "\"false\"";
 				default:
 					throw new NotSupportedException($"We don't know how to generate a value of type {type}.");
 			}
 		}
 
 
-		static string GenerateFunctionCall(string className, string functionName)
+		static string GenerateSmartContractCall(string className, string functionName)
 		{
-			string code = functionName + "(";
+			
+			string code = "pci -C mychannel -n cocome --waitForEvent -c \'{\"function\":\"" + className + ":" + functionName + "\",\"Args\":[";
 			var parameters = QueryParameters(className, functionName);
 
 			code += string.Join(", ", parameters.Select(parameterType => GetValueOfType(parameterType)));
 
-			return code + ")\n";
+			return code + "]}' || fail || return\n";
 		}
 
 		/// <summary>
@@ -111,7 +112,7 @@ namespace TestCodeGeneration
 					"We do not intent to handle duplicate coroutines either. You can call it a limitation of our paper.");
 
 
-			if (targetLanguage == "python")
+			if (targetLanguage == "bash")
 			{
 				string code = "";
 				foreach (var function in compositionOrder)
@@ -119,7 +120,7 @@ namespace TestCodeGeneration
 					var parts = function.Split("::");
 					string className = parts[0];
 					string functionName = parts[1];
-					code += GenerateFunctionCall(className, functionName);
+					code += GenerateSmartContractCall(className, functionName);
 				}
 				return code;
 			}
