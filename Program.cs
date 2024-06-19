@@ -6,6 +6,7 @@ using System.Linq;
 namespace TestCodeGeneration
 {
 	class Program
+	//全部按照当前状态改完后运行
 	{
 		static void Main(string[] args)
 		{
@@ -17,7 +18,8 @@ namespace TestCodeGeneration
 
 			string code = Generate(compositionOrder, "bash");
 			Console.WriteLine(code);
-			using (StreamWriter sw = new StreamWriter("program.sh"))
+			//output file name(.java   .py   .cpp    .sh)
+			using (StreamWriter sw = new StreamWriter("program3.sh"))
 				sw.WriteLine(code);
 
 		}
@@ -90,7 +92,44 @@ namespace TestCodeGeneration
 
 		static string GenerateSmartContractCall(string className, string functionName)
 		{
-			
+			string code = GenerateLanguageStype();
+
+			code += GenerateDefinePCI();
+
+			code += GeneratePCISmartContractCall(className, functionName);
+
+
+			return code + "\n";
+		}
+
+
+		static string GenerateLanguageStype() 
+		{
+			string code = "#!/bin/bash";
+
+			return code + "\n";
+		}
+
+
+		static string GenerateDefinePCI()
+		{
+			string code = @"function pci {
+											if [[ ""$ZSH_NAME"" ]]; then
+												setopt local_options SH_WORD_SPLIT
+											fi
+
+											peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel \
+											>---  --peerAddresses localhost:7051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+											>---  --peerAddresses localhost:9051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+												  ""$@""
+											}";
+			return code + "\n";
+		}
+
+
+		static string GeneratePCISmartContractCall(string className, string functionName)
+		{
+
 			string code = "pci -C mychannel -n cocome --waitForEvent -c \'{\"function\":\"" + className + ":" + functionName + "\",\"Args\":[";
 			var parameters = QueryParameters(className, functionName);
 
@@ -98,6 +137,15 @@ namespace TestCodeGeneration
 
 			return code + "]}' || fail || return\n";
 		}
+
+
+		static string GenerateDockSmartContractCall()
+		{
+			string code = "docker stop \"$(docker ps -n --filter \'name=dev\' --format \'{{.ID}}\')\"";
+
+			return code + "\n";
+		}
+
 
 		/// <summary>
 		/// 
@@ -114,13 +162,38 @@ namespace TestCodeGeneration
 
 			if (targetLanguage == "bash")
 			{
-				string code = "";
+				string code = @"#!/bin/bash
+
+function pci {
+  if [[ ""$ZSH_NAME"" ]]; then
+    setopt local_options SH_WORD_SPLIT
+  fi
+
+  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel \
+>---  --peerAddresses localhost:7051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+>---  --peerAddresses localhost:9051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+      ""$@""
+}
+
+
+export PATH=/home/liushuaixue/liulixue/hyper/fabric-samples/bin:$PATH
+
+export FABRIC_CFG_PATH=$PWD/../config/
+
+if [[ -z ""$GITHUB_WORKSPACE"" ]]; then
+>---GITHUB_WORKSPACE=~/cocome-hyperledger/
+fi
+
+source $GITHUB_WORKSPACE/src/test/shell/as-org1.sh
+
+
+";
 				foreach (var function in compositionOrder)
 				{
 					var parts = function.Split("::");
 					string className = parts[0];
 					string functionName = parts[1];
-					code += GenerateSmartContractCall(className, functionName);
+					code += GeneratePCISmartContractCall(className, functionName);
 				}
 				return code;
 			}
