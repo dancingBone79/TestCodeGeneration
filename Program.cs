@@ -8,8 +8,10 @@ namespace TestCodeGeneration
 	class Program
 	//全部按照当前状态改完后运行
 	{
+		static string contractPath;
 		static void Main(string[] args)
 		{
+			contractPath = args[0];
 			List<string> compositionOrder = new List<string>();
 			compositionOrder.Add("ManageStoreCRUDService::createStore");
 			compositionOrder.Add("CoCoMESystem::openStore");
@@ -49,7 +51,7 @@ namespace TestCodeGeneration
 		static List<string> QueryParameters(string className, string functionName)
 		{
 			//查询 remodel， 取出参数的类型的列表
-			string path = @"C:\Users\p2215981\Desktop\Liu.Lixue\coroutine-program\RequirementAnalysisTests\cocome.remodel";
+			string path = contractPath;
 			var reModelContent = File.ReadAllText(path);
 			string[] lines = reModelContent.Split("\n");
 
