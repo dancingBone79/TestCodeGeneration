@@ -130,7 +130,7 @@ namespace TestCodeGeneration
 		static string GeneratePCISmartContractCall(string className, string functionName)
 		{
 
-			string code = "pci -C mychannel -n cocome --waitForEvent -c \'{\"function\":\"" + className + ":" + functionName + "\",\"Args\":[";
+			string code = "pci -C mychannel -n cocome --waitForEvent -c \'{\"function\":\"" + className + "Impl:" + functionName + "\",\"Args\":[";
 			var parameters = QueryParameters(className, functionName);
 
 			code += string.Join(", ", parameters.Select(parameterType => GetValueOfType(parameterType)));
