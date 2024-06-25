@@ -1,2 +1,20 @@
+
+1. generate the bash test file, named 'program00.sh'.
+```
+dotnet build
+dotnet TestCodeGeneration.dll /home/liushuaixue/liulixue/testProject/coroutine-program/RequirementAnalysisTests/cocome.remodel
+```
+
+
+2. change the file execution permission
 run command:
-  GITHUB_WORKSPACE=~/liulixue/testProject/cocome-hyperledger ~/liulixue/testProject/cocome-hyperledger/src/test/shell/program00.sh
+```
+chmod +x program00.sh
+```
+
+
+3. run the bash test file to execute the hyperlydger (now: cocome contract)
+run command:
+```
+GITHUB_WORKSPACE=~/liulixue/testProject/cocome-hyperledger /home/liushuaixue/TestCodeGeneration/bin/Debug/net8.0/program00.sh
+```
