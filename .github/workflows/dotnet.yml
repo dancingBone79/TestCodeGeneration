@@ -15,5 +15,9 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
+      - name: generate
+        run: dotnet bin/Debug/net8.0/TestCodeGeneration.dll cocome.remodel
+      - name: permission
+        run: chmod +x program03.sh
       - name: Test
         run: dotnet test --no-restore --verbosity normal
