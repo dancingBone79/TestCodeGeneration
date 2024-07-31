@@ -20,4 +20,6 @@ jobs:
       - name: permission
         run: chmod +x program00.sh
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        run: |
+          sudo apt-get install shellcheck
+          shellcheck -x program00.sh
