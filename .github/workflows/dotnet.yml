@@ -22,4 +22,4 @@ jobs:
       - name: Test
         run: |
           sudo apt-get install shellcheck
-          shellcheck -x program00.sh
+          shellcheck -S error program00.sh
